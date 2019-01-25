@@ -1,8 +1,8 @@
 import qs from 'qs';
 import axios from '@/utils/axios';
 
-const prefix = '/api/web/';
-const HTTP_VERBS = {
+export const prefix = '/api/web/';
+export const HTTP_VERBS = {
     post: 'post',
     get: 'get',
     put: 'put',
@@ -56,7 +56,7 @@ function callAxios(url, type, data, options = {}) {
     return rv;
 }
 
-function callAPI(url, type, params, options = {}) {
+export function callAPI(url, type, params, options = {}) {
     let data = params;
     if (!(typeof params === 'string' || params instanceof String)) {
         data = qs.stringify(params);
@@ -68,7 +68,7 @@ function callAPI(url, type, params, options = {}) {
                 responseCode = response.status;
             }
             if (responseCode == 200 && response.data) {
-                if (response.data.code !== undefined) {
+                if (response.data.data.code !== undefined) {
                     responseCode = response.data.code;
                 }
             }
@@ -79,13 +79,13 @@ function callAPI(url, type, params, options = {}) {
                 }
 
                 return Promise.reject(Object.assign(
-                    response.data.data,
+                    response.data,
                     { code: responseCode, message }
                 ));
             }
             return Promise.resolve(Object.assign(
-                (response.data && response.data.data) || {},
-                { code: responseCode, message: response.data.data && response.data.msg }
+                (response.data) || {},
+                { code: responseCode, }
             ));
         }).catch((error) => {
             if (error && error.response) {
@@ -102,10 +102,4 @@ function callAPI(url, type, params, options = {}) {
             }
         });
 }
-const service = {
-  login(data) {
-    return callAPI('auth/login', HTTP_VERBS.post, { ...data });
-  },
-};
-export default service;
 
