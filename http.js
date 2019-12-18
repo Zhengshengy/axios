@@ -1,8 +1,8 @@
 import qs from 'qs';
 import axios from '@/servers/axios';
+import { getCookies } from '@/utils/cookies'
 
-
-export const prefix = '/api/';
+export const prefix = process.env.NODE_ENV==='development' ? '' : process.env.VUE_APP_URL;
 export const HTTP_VERBS = {
     post: 'post',
     get: 'get',
@@ -11,14 +11,15 @@ export const HTTP_VERBS = {
 };
 
 export function getAPIHeaders() {
+    let auth = getCookies('token')
     const headers = ({
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': 'application/json'
     });
-    // if (auth) {
-    //     headers['Authorization'] = auth;
-    // }
+    if (auth) {
+        headers['Authorization'] = auth;
+    }
     return headers;
 }
 

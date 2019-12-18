@@ -1,14 +1,11 @@
 import axios from 'axios';
-import { MessageBox } from 'element-ui'
-
+import router from '@/router'
+import store from '@/store/index'
 import Vue from 'vue'
 
 let options = {
-    baseURL: '/'
+    baseURL: process.env.VUE_APP_URL
 };
-if (process.server) {
-    options.baseURL = `http://a1.jancai029.com/index.php/`;
-}
 const axiosInstance = axios.create(options)
 
 
@@ -42,7 +39,7 @@ function hideFullScreenLoading () {
 }
 axiosInstance.interceptors.request.use(
     config => {
-        if (config.isLoading !== false) { // 如果配置了isLoading: false，则不显示loading
+        if (config.headers.isLoading !== false) { // 如果配置了isLoading: false，则不显示loading
             showFullScreenLoading()
         }
         return config
@@ -62,8 +59,24 @@ axiosInstance.interceptors.response.use(
     error => {
         hideFullScreenLoading()
         if (error.response.status === 500) {
-
+            // MessageBox.alert('接口报错了 找权鑫', '出错了', {
+            //     confirmButtonText: '确定',
+            //     type: 'warning',
+            //     callback: action => {
+            //         //location.reload() // 为了重新实例化vue-router对象 避免bug
+            //         // router.replace({ // 跳转到登录页面
+            //         //     path: '/login'
+            //         //     // query: { redirect: router.currentRoute.fullPath } // 将跳转的路由path作为参数，登录成功后跳转到该路由
+            //         // })
+            //     }
+            // })
             return Promise.reject(error.response)
+        }else if (error.response.status === 401){
+            store.commit('user/del_token')
+            router.replace({
+                path: '/login',
+                query: {redirect: router.currentRoute.fullPath}//登录成功后跳入浏览的当前页面
+            })
         }
     })
 
